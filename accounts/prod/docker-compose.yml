@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+
+  configserver:
+    image: configserver:latest
+    mem_reservation: 700m
+    ports:
+      - "8071:8071"
+    networks:
+      - skyfall-network
+
+  accounts:
+    image: accounts:latest
+    mem_reservation: 700m
+    ports:
+      - "8081:8081"
+    networks:
+      - skyfall-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILE_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071 
+
+
+  cards:
+    image: cards:latest
+    mem_reservation: 700m
+    ports:
+      - "8083:8083"
+    networks:
+      - skyfall-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILE_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071 
+
+
+  loans:
+    image: loans:latest
+    mem_reservation: 700m
+    ports:
+      - "8082:8082"
+    networks:
+      - skyfall-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILE_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071 
+
+
+networks:
+  skyfall-network:
